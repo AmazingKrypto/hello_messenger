@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+   MyApp({super.key});
+  late ThemeData theme;
+  Key key = UniqueKey();
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Hello Messenger', key: key,
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -31,8 +34,25 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const HomePage(title: 'Flutter Demo Home Page'),
     );
+
+  }
+
+  Widget startPage (){
+    BlocBuilder<AuthenticationBloc, AuthenticationState>(
+          builder: (context, state) {
+            if (state is UnAuthenticated) {
+              return RegisterPage();
+            } else if (state is ProfileUpdated) {
+              if(SharedObjects.prefs.getBool(Constants.configMessagePaging))
+                BlocProvider.of<ChatBloc>(context).add(FetchChatListEvent());
+              return HomePage();
+            } else {
+              return RegisterPage();
+            }
+          },
+        ),
   }
 }
 
